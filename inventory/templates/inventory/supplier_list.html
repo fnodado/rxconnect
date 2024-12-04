@@ -1,0 +1,38 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+  <h1>Pharmacy Supplier List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Supplier ID</th>
+                <th>Supplier Name</th>
+                <th>Contact Info</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+            <tr>
+                <td>{{ supplier.supplier_id }}</td>
+                <td>{{ supplier.name }}</td>
+                <td>{{ supplier.contact_info }}</td>
+                <td>
+                  <a href="{% url 'edit-supplier' supplier.supplier_id %}" class="button">Edit</a>
+                  <form action="{% url 'delete-supplier' supplier.supplier_id %}" method="POST" style="display: inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="button">Delete</button>
+                  </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No supplier available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+{% endblock %}

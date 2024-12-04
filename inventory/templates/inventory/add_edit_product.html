@@ -1,0 +1,32 @@
+{% extends 'main.html' %}
+{% block content %}
+
+
+<div class="auth">
+  <div class="card">
+    <div class="auth__header text-center">
+      <h3>{% if page == 'add_product' %}Add a Product{% else %}Edit Product{% endif %}</h3>
+    </div>
+
+    <form method="POST" action="{% if page == 'add_product' %}{% url 'add-product' %}{% else %}{% url 'edit-product' product.product_id %}{% endif %}"
+          class="form auth__form">
+      {% csrf_token %}
+      {% for field in form%}
+      <!-- Input:Text -->
+      <div class="form__field">
+        <label for="formInput#text">{{field.label}}</label>
+        {{field}}
+        {% for error in field.errors%}
+        <p style="color: red;">{{error}}</p>
+        {% endfor%}
+
+      </div>
+      {% endfor %}
+      <div class="auth__actions">
+        <input class="btn btn--sub btn--lg" type="submit" value="Save" />
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock content%}

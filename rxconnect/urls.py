@@ -15,6 +15,8 @@ urlpatterns = [
     path('logout/', views.logout_user, name="logout"),
     path('register/', views.register_user, name="register_user"),
 
-
-    path('users/', include('users.urls')), ##includes the users app
+    #include apps
+    path('users/', include('users.urls')),
+    path('inventory/', include('inventory.urls')),
+    path('transactions/', include('transactions.urls')),
 ]

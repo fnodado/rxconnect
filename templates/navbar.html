@@ -15,7 +15,24 @@
         <ul class="header__menu">
           {% if request.user.is_authenticated %}
           <li class="header__menuItem"><a href="{% url 'user-profile' request.user.profile.id %}">Profile</a></li>
-          <li class="header__menuItem"><a href="" class="btn btn--sub">Add Product</a></li>
+          <li class="header__menuItem">
+            <select id="dropdown1" class="btn btn--sub" name="options" onchange="window.location = this.value;">
+              <option value="" disabled selected>Transaction List</option>
+              <option value="{% url 'product-list' %}">Products</option>
+              <option value="{% url 'supplier-list' %}">Suppliers</option>
+              <option value="{% url 'purchase-list' %}">Purchase Transactions</option>
+            </select>
+          </li>
+          <li class="header__menuItem">
+            <select id="dropdown" class="btn btn--sub" name="options" onchange="window.location = this.value;">
+              <option value="" disabled selected>Transactions</option>
+              <option value="{% url 'add-product' %}">Add Product</option>
+              <option value="{% url 'add-supplier' %}">Add Supplier</option>
+              <option value="{% url 'add-purchase' %}">Purchase</option>
+              <option value="{% url 'edit-account' %}">Sale</option>
+              <option value="{% url 'edit-account' %}">Return</option>
+            </select>
+          </li>
           <li class="header__menuItem"><a href="{% url 'logout' %}" class="btn btn--sub">Logout</a></li>
           {% else %}
           <li class="header__menuItem"><a href="{% url 'login' %}" class="btn btn--sub">Login/Sign Up</a></li>
@@ -24,3 +41,4 @@
       </nav>
     </div>
   </header>
+

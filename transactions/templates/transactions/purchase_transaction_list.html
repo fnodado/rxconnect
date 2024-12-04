@@ -1,0 +1,37 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+  <h1>Pharmacy Purchase Transaction List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Purchase Transaction ID</th>
+                <th>Product Name</th>
+                <th>Supplier Name</th>
+                <th>Current Stock</th>
+                <th>Description</th>
+                <th>Transaction Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for purchase in purchases %}
+            <tr>
+                <td>{{ purchase.id }}</td>
+                <td>{{ purchase.product.name }}</td>
+                <td>{{ purchase.supplier.name }}</td>
+                <td>{{ purchase.quantity }}</td>
+                <td>{{ purchase.description }}</td>
+                <td>{{ purchase.created_at }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No purchases available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+{% endblock %}
