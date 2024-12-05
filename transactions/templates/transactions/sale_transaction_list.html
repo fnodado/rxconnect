@@ -1,0 +1,37 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+  <h1>Pharmacy Sale Transaction List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Sale Transaction ID</th>
+                <th>Transaction Date</th>
+                <th>Customer Name</th>
+                <th>Total Price</th>
+                <th>User name</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+            <tr>
+                <td>{{ sale.sale_id }}</td>
+                <td>{{ sale.transaction_date}}</td>
+                <td>{{ sale.customer_name }}</td>
+                <td>{{ sale.total_price }}</td>
+                <td>{{ sale.user.username }}</td>
+                <td>{{ sale.status }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No sales available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+{% endblock %}

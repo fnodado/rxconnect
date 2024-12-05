@@ -8,6 +8,7 @@ urlpatterns = [
 
     #sale transaction urls
     path('sale/', views.sale_transaction, name='sale-transaction'),
+    path('sale/list', views.sale_list, name="sales-list"),
     path('sale-item/<int:sale_id>/', views.sale_item, name='sale-item'),
     path('checkout-item/<int:sale_id>/', views.checkout, name='checkout-item'),
     path('complete/<int:sale_id>/', views.complete_sale, name='complete-sale'),

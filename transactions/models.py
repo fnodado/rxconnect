@@ -11,13 +11,16 @@ from inventory.models import Product, Supplier
 # Purchase Transaction Model
 class PurchaseTransaction(models.Model):
     id = models.AutoField(primary_key=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
+    product_name = models.CharField(max_length=255, null=True, blank=True)  # Store the product name
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     def save(self, *args, **kwargs):
+        if self.product:
+            self.product_name = self.product.name
         # Update product stock on purchase
         self.product.current_stock += self.quantity
         self.product.save()

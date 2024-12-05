@@ -18,7 +18,7 @@
             {% for purchase in purchases %}
             <tr>
                 <td>{{ purchase.id }}</td>
-                <td>{{ purchase.product.name }}</td>
+                <td>{{ purchase.product.name|default:purchase.product_name}}</td>
                 <td>{{ purchase.supplier.name }}</td>
                 <td>{{ purchase.quantity }}</td>
                 <td>{{ purchase.description }}</td>

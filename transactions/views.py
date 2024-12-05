@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -24,6 +25,12 @@ def purchase_transaction(request):
     else:
         form = PurchaseTransactionForm()
     return render(request, 'transactions/add_edit_purchase.html', {'form': form, 'page': 'add_purchase'})
+
+@login_required
+def sale_list(request):
+    sales = SaleTransaction.objects.select_related('user').all()
+    return render(request, 'transactions/sale_transaction_list.html', {'sales': sales})
+
 
 @login_required
 def sale_transaction(request):
