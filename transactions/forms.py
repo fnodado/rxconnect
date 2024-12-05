@@ -1,7 +1,8 @@
 from django import forms
 
-from inventory.models import Product, Supplier
 from .models import PurchaseTransaction, ReturnTransaction, ReturnItem
+from .models import SaleItem
+from .models import SaleTransaction
 
 
 class PurchaseTransactionForm(forms.ModelForm):
@@ -24,31 +25,49 @@ class PurchaseTransactionForm(forms.ModelForm):
 
 
 
-from django import forms
-from .models import SaleTransaction
+
 
 class SaleTransactionForm(forms.ModelForm):
     class Meta:
         model = SaleTransaction
-        fields = ['customer_name', 'user']
-        widgets = {
-            'customer_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter customer name'}),
-            'user': forms.Select(attrs={'class': 'form-control'}),
-        }
+        fields = ['customer_name']
 
+    # user = forms.BooleanField(
+    #     widget=forms.TextInput(attrs={'type': 'text', 'class': 'custom-text-input', 'readonly': 'readonly'})  # Change from checkbox to input
+    # )
 
-from django import forms
-from .models import SaleItem
+    def __init__(self, *args, **kwargs):
+        self.current_user = kwargs.pop('user', None)
+        super(SaleTransactionForm, self).__init__(*args, **kwargs)
+
+        for name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'input'})
+
+    def save(self, commit=True):
+        print('form save ', self.current_user)
+        # Save logic to ensure the field is set properly in the instance
+        instance = super(SaleTransactionForm, self).save(commit=False)
+        if self.current_user:
+            instance.user = self.current_user  # Explicitly set the value
+        if commit:
+            instance.save()
+        return instance
+
 
 class SaleItemForm(forms.ModelForm):
     class Meta:
         model = SaleItem
-        fields = ['product', 'quantity', 'unit_price']
-        widgets = {
-            'product': forms.Select(attrs={'class': 'form-control'}),
-            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'placeholder': 'Enter quantity'}),
-            'unit_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'placeholder': 'Enter unit price'}),
-        }
+        fields = ['product', 'quantity']
+
+        unit_price = forms.BooleanField(
+            widget=forms.TextInput(attrs={'readonly': 'readonly'})  # Change from checkbox to input
+        )
+
+    def __init__(self, *args, **kwargs):
+        super(SaleItemForm, self).__init__(*args, **kwargs)
+
+        for name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'input'})
 
     def clean_quantity(self):
         quantity = self.cleaned_data.get('quantity')
@@ -56,11 +75,13 @@ class SaleItemForm(forms.ModelForm):
             raise forms.ValidationError("Quantity must be greater than zero.")
         return quantity
 
-    def clean_unit_price(self):
-        unit_price = self.cleaned_data.get('unit_price')
-        if unit_price <= 0:
-            raise forms.ValidationError("Unit price must be greater than zero.")
-        return unit_price
+    def clean(self):
+        cleaned_data = super().clean()
+        product = cleaned_data.get('product')
+        if product:
+            cleaned_data['unit_price'] = product.unit_price
+        return cleaned_data
+
 
 class ReturnTransactionForm(forms.ModelForm):
     class Meta:

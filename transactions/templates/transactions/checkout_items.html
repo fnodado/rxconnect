@@ -1,0 +1,50 @@
+{% extends 'main.html' %}
+{% block content %}
+
+
+<h1>Checkout Item List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in sale_items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.unit_price }}</td>
+                <td>{{ item.sub_total }}</td>
+                <td>
+                    <form method="POST" action="{% url 'delete-sale-item' item.sale_item_id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No products available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Total Amount -->
+    <div class="mb-3 text-end">
+        <h4>Total: {{ total_price }}</h4>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex justify-content-between">
+        <a href="{% url 'sale-item' sale_id=sale_id %}" class="btn btn-secondary">Add More Items</a>
+        <a href="{% url 'complete-sale' sale_id=sale_id %}" class="btn btn-primary">Complete Transaction</a>
+    </div>
+
+
+
+{% endblock content%}

@@ -1,3 +1,5 @@
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils import timezone
 
 from django.contrib.auth.models import User
@@ -28,6 +30,11 @@ class SaleTransaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     customer_name = models.CharField(max_length=255)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    STATUS_CHOICES = [
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress')
 
 class SaleItem(models.Model):
     sale_item_id = models.AutoField(primary_key=True)
@@ -42,8 +49,9 @@ class SaleItem(models.Model):
         self.product.current_stock -= self.quantity
         self.product.save()
         # Calculate subtotal
-        self.sub_total = self.quantity * self.unit_price
+        self.sub_total = self.quantity * self.product.unit_price
         super().save(*args, **kwargs)
+
 
 # Return Transaction Model
 class ReturnTransaction(models.Model):
