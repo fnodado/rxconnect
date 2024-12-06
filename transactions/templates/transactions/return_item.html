@@ -1,14 +1,17 @@
 {% extends 'main.html' %}
 {% block content %}
+
 <div class="auth">
   <div class="card">
     <div class="auth__header text-center">
-      <h3>Sale Transaction</h3>
+      <h3>Add Return Items</h3>
     </div>
 
-    <form action="{% url 'sale-transaction' %}" method="POST">
+    <form method="POST">
         {% csrf_token %}
+      <label for="formInput#text" class="form-label">Product: </label>
         {% for field in form%}
+        {{product.name}}
       <!-- Input:Text -->
       <div class="form__field">
         <label for="formInput#text">{{field.label}}</label>
@@ -21,7 +24,7 @@
       {% endfor %}
 
       <div class="auth__actions">
-        <input class="btn btn--sub btn--lg" type="submit" value="Sale Transaction" />
+        <input class="btn btn--sub btn--lg" type="submit" value="Save" />
       </div>
     </form>
 

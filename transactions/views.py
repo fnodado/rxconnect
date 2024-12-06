@@ -4,9 +4,10 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
+from inventory.models import Product
 from transactions.forms import PurchaseTransactionForm, SaleTransactionForm, SaleItemForm, ReturnTransactionForm, \
     ReturnItemForm
-from transactions.models import SaleTransaction, ReturnTransaction, PurchaseTransaction, SaleItem
+from transactions.models import SaleTransaction, ReturnTransaction, PurchaseTransaction, SaleItem, ReturnItem
 
 
 # Create your views here.
@@ -70,29 +71,51 @@ def sale_item(request, sale_id):
     return render(request, 'transactions/sale_item.html', {'form': form, 'sale': sale})
 
 @login_required
-def return_transaction(request):
-    if request.method == 'POST':
-        form = ReturnTransactionForm(request.POST)
-        if form.is_valid():
-            return_transaction = form.save()
-            return redirect('return-item', return_id=return_transaction.return_id)
-    else:
-        form = ReturnTransactionForm()
-    return render(request, 'transactions/return_transaction.html', {'form': form})
+def return_transaction(request, sale_id):
+    sale_transaction_obj = get_object_or_404(SaleTransaction, pk=sale_id)
 
-@login_required
-def return_item(request, return_id):
-    return_transaction = get_object_or_404(ReturnTransaction, pk=return_id)
     if request.method == 'POST':
-        form = ReturnItemForm(request.POST)
+        form = ReturnTransactionForm(request.POST, sale=sale_transaction_obj,
+                                     user=request.user)
         if form.is_valid():
-            return_item = form.save(commit=False)
-            return_item.return_transaction = return_transaction
-            return_item.save()
-            return redirect('return-item', return_id=return_id)
+            print('valid')
+            return_transaction_obj = form.save()
+            print('saved')
+            return redirect('view-sale-items', sale_id, return_transaction_obj.return_id)  # Redirect to the sale transaction given id
+    else:
+        print('else statemeent', sale_item)
+        form = ReturnTransactionForm(initial={
+            'sale': sale_transaction_obj,
+        })
+
+    return render(request, 'transactions/return_transaction.html', {
+        'form': form,
+    })
+@login_required
+def return_item(request, return_id, sale_item_id):
+    sale_item_obj = get_object_or_404(SaleItem, pk=sale_item_id)
+    product = get_object_or_404(Product, pk=sale_item_obj.product_id)
+    return_transaction_obj = get_object_or_404(ReturnTransaction, pk=return_id)
+    print('sale item qty: ', sale_item_obj.quantity)
+    print('product in return: ', product)
+    print('product type: ', type(product))
+    print('product instance: ', product)
+    if request.method == 'POST':
+        print('request method post')
+        form = ReturnItemForm(request.POST, quantity=sale_item_obj.quantity,
+                                     valid_refund_amount=sale_item_obj.unit_price,
+                                    product= product)
+        if form.is_valid():
+            print('return valid form')
+            return_item_obj = form.save(commit=False)
+            return_item_obj.return_transaction = return_transaction_obj
+            return_item_obj.save()
+            return redirect('return-checkout-item', return_id=return_id)
+
     else:
         form = ReturnItemForm()
-    return render(request, 'transactions/return_item.html', {'form': form, 'return_transaction': return_transaction})
+    return render(request, 'transactions/return_item.html',
+                  {'form': form, 'product': product})
 
 @login_required
 def checkout(request, sale_id):
@@ -101,6 +124,38 @@ def checkout(request, sale_id):
     sale_items = SaleItem.objects.filter(sale=sale)
     total_price = sum(item.sub_total for item in sale_items)
     return render(request, 'transactions/checkout_items.html', {'sale': sale, 'sale_items': sale_items, 'total_price': total_price, 'sale_id': sale_id})
+
+@login_required
+def return_checkout(request, return_id):
+    print('refund checkout', return_id)
+    return_transaction_obj = get_object_or_404(ReturnTransaction, pk=return_id)
+    print('got the rreturn object')
+    return_items = ReturnItem.objects.filter(return_transaction=return_transaction_obj)
+    print('got he return_items', return_items)
+    total_price = sum(item.sub_total for item in return_items)
+    return render(request, 'transactions/return_checkout_items.html', {'return_transaction': return_transaction_obj, 'return_items': return_items,
+                'total_price': total_price, 'sale_id': return_transaction_obj.sale_id, 'return_id': return_id})
+
+@login_required
+def complete_return(request, return_id):
+    print('complete_return')
+    return_transaction_obj = get_object_or_404(ReturnTransaction, pk=return_id)
+
+    # Update stock for all items in the sale
+    return_items = ReturnItem.objects.filter(return_transaction=return_transaction_obj)
+    for item in return_items:
+        product = item.product
+
+        product.current_stock += item.quantity
+        product.save()
+
+    # Update the sale transaction status
+    return_transaction_obj.status = 'completed'
+    return_transaction_obj.save()
+
+    messages.success(request, "Transaction completed successfully!")
+    # Redirect to the dashboard page
+    return redirect('dashboard')
 
 
 @login_required
@@ -138,3 +193,26 @@ def delete_sale_item(request, item_id):
     sale_item.delete()
     messages.success(request, "Item successfully deleted.")
     return redirect('checkout-item', sale_id=sale_id)
+
+@login_required
+def delete_return_item(request, return_item_id):
+    return_item_obj = get_object_or_404(ReturnItem, pk=return_item_id)
+    return_id = return_item_obj.return_transaction.return_id  # Get associated sale ID
+
+
+    # Delete the item
+    return_item_obj.delete()
+    messages.success(request, "Item successfully deleted.")
+    return redirect('return-checkout-item', return_id=return_id)
+
+
+@login_required
+def view_sale_items(request, sale_id, return_id):
+    print('view sale item return id', return_id)
+    print('view sale item sale id', sale_id)
+    sale = get_object_or_404(SaleTransaction, pk=sale_id)
+    print('here')
+    sale_items = SaleItem.objects.filter(sale=sale)
+    print('before html')
+    return render(request, 'transactions/view_sale_items.html', {'sale': sale,
+                    'sale_items': sale_items, 'return_id': return_id, 'sale_id': sale_id})

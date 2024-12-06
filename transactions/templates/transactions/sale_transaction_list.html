@@ -23,6 +23,9 @@
                 <td>{{ sale.total_price }}</td>
                 <td>{{ sale.user.username }}</td>
                 <td>{{ sale.status }}</td>
+                <td>
+                  <a href="{% url 'return-transaction' sale.sale_id %}" class="button">View</a>
+                </td>
             </tr>
             {% empty %}
             <tr>

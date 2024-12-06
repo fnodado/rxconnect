@@ -14,6 +14,8 @@ class ProductForm(forms.ModelForm):
         for name, field in self.fields.items():
             field.widget.attrs.update({'class': 'input'})
 
+    #hooks that will be automatically called when clean_<fieldname> the fieldname
+    #is triggered during is_valid() method
     def clean_name(self):
         name = self.cleaned_data.get('name')
         if Product.objects.filter(name=name).exists():

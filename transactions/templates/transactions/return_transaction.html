@@ -1,0 +1,30 @@
+{% extends 'main.html' %}
+{% block content %}
+
+
+<div class="auth">
+  <div class="card">
+    <div class="auth__header text-center">
+      <h3>Return Transaction</h3>
+    </div>
+
+    <form action="#" method="POST">
+        {% csrf_token %}
+
+       {% for field in form%}
+        <!-- Input:Text -->
+        <div class="form__field">
+            <label for="formInput#text">{{field.label}}</label>
+            {{field}}
+
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">Submit Return Transaction</button>
+    </form>
+
+
+  </div>
+</div>
+
+{% endblock content%}

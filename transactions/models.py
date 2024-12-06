@@ -43,11 +43,14 @@ class SaleItem(models.Model):
     sale_item_id = models.AutoField(primary_key=True)
     sale = models.ForeignKey(SaleTransaction, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_name = models.CharField(max_length=255, null=True, blank=True)  # Store the product name
     quantity = models.IntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)
 
     def save(self, *args, **kwargs):
+        if self.product:
+            self.product_name = self.product.name
         # Update product stock on sale
         self.product.current_stock -= self.quantity
         self.product.save()
@@ -62,26 +65,20 @@ class ReturnTransaction(models.Model):
     sale = models.ForeignKey(SaleTransaction, on_delete=models.CASCADE)
     transaction_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    refund_amount = models.DecimalField(max_digits=10, decimal_places=2)
     refund_reason = models.TextField()
     status = models.CharField(max_length=50, choices=[
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected')
-    ])
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ], default='in_progress')
 
 class ReturnItem(models.Model):
     return_item_id = models.AutoField(primary_key=True)
     return_transaction = models.ForeignKey(ReturnTransaction, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)
 
     def save(self, *args, **kwargs):
-        # Update product stock on return
-        self.product.current_stock += self.quantity
-        self.product.save()
         # Calculate subtotal
-        self.sub_total = self.quantity * self.unit_price
+        self.sub_total = self.quantity * self.product.unit_price
         super().save(*args, **kwargs)
