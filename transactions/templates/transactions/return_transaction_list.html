@@ -1,0 +1,37 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+  <h1>Pharmacy Return Transaction List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Return Transaction ID</th>
+                <th>Transaction Date</th>
+                <th>Refund Reason</th>
+                <th>Status</th>
+                <th>User name</th>
+                <th>Sale id</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in return_list %}
+            <tr>
+                <td>{{ obj.return_id }}</td>
+                <td>{{ obj.transaction_date}}</td>
+                <td>{{ obj.refund_reason }}</td>
+                <td>{{ obj.status }}</td>
+                <td>{{ obj.user_id }}</td>
+                <td>{{ obj.sale_id }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No sales available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+
+{% endblock %}

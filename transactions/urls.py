@@ -32,6 +32,7 @@ urlpatterns = [
     path('sale/<int:sale_id>/items/<int:return_id>', views.view_sale_items, name='view-sale-items'),
 
     #return transaction urls
+    path('return/list', views.return_list, name="return-transaction-list"),
     path('return/<int:sale_id>/', views.return_transaction, name='return-transaction'),
     path('return/checkout-item/<int:return_id>/', views.return_checkout, name='return-checkout-item'),
     path('return-item/<int:return_id>/<int:sale_item_id>', views.return_item, name='return-item'),

@@ -48,16 +48,6 @@ class SaleItem(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)
 
-    def save(self, *args, **kwargs):
-        if self.product:
-            self.product_name = self.product.name
-        # Update product stock on sale
-        self.product.current_stock -= self.quantity
-        self.product.save()
-        # Calculate subtotal
-        self.sub_total = self.quantity * self.product.unit_price
-        super().save(*args, **kwargs)
-
 
 # Return Transaction Model
 class ReturnTransaction(models.Model):
@@ -78,7 +68,7 @@ class ReturnItem(models.Model):
     quantity = models.IntegerField()
     sub_total = models.DecimalField(max_digits=10, decimal_places=2)
 
-    def save(self, *args, **kwargs):
-        # Calculate subtotal
-        self.sub_total = self.quantity * self.product.unit_price
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # Calculate subtotal
+    #     self.sub_total = self.quantity * self.product.unit_price
+    #     super().save(*args, **kwargs)

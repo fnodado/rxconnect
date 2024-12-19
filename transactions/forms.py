@@ -86,7 +86,7 @@ class SaleItemForm(forms.ModelForm):
 class ReturnTransactionForm(forms.ModelForm):
     class Meta:
         model = ReturnTransaction
-        fields = ['refund_reason', 'status']
+        fields = ['refund_reason']
 
     def __init__(self, *args, **kwargs):
         self.current_sale = kwargs.pop('sale', None)
